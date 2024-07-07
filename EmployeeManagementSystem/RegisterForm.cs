@@ -45,28 +45,55 @@ namespace EmployeeManagementSystem
 
         private void register_btn_Click(object sender, EventArgs e)
         {
-            if (register_username.Text == ""| register_password.Text == "")
+            if (register_username.Text == "" || register_password.Text == "")
             {
                 MessageBox.Show("Please fill all blank fields ", "Error Message", MessageBoxButtons.OK, MessageBoxIcon.Error);
+               
             }
             else
             {
-                if (connect.State == ConnectionState.Open) {
+                if (connect.State != ConnectionState.Open)
+                {
                     try
                     {
                         connect.Open();
-                        DateTime today = DateTime.Today;
-                        string insertData = "INSERT INTO users " + 
-                            "(username, password,date_register)" + 
-                            "VALUES(@username,@password, @date_Reg";
 
-                        using (SqlCommand cmd = new SqlCommand(insertData))
+                        string selectUsername = "SELECT COUNT(id) FROM users WHERE username = @user";
+
+                        using (SqlCommand checkUser = new SqlCommand(selectUsername, connect))
                         {
-                            cmd.Parameters.AddWithValue("@username", register_username.Text.Trim());
-                            cmd.Parameters.AddWithValue("@password", register_password.Text.Trim());
-                            cmd.Parameters.AddWithValue("@date_Reg", today);
+                            checkUser.Parameters.AddWithValue("@user", register_username.Text.Trim());
+                            int count = (int)checkUser.ExecuteScalar();
 
-                            MessageBox.Show("Registered successfully!","Information Message",MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            if (count >= 1)
+                            {
+                                
+                                MessageBox.Show(register_username.Text.Trim() + "is already taken ", "Error Message", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            }
+                            else
+                            {
+                                DateTime today = DateTime.Today;
+
+
+                                string insertData = "INSERT INTO users " +
+                                    "(username, password, date_register)" +
+                                    "VALUES(@username,@password, @dateReg)";
+
+                                using(SqlCommand cmd = new SqlCommand(insertData, connect))
+                                {
+                                    cmd.Parameters.AddWithValue("@username", register_username.Text.Trim());
+                                    cmd.Parameters.AddWithValue("@password", register_password.Text.Trim());
+                                    cmd.Parameters.AddWithValue("@dateReg", today);
+
+                                    cmd.ExecuteNonQuery();
+
+                                    MessageBox.Show("Registered successfully!", "Information Message", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                                    Form1 loginForm = new Form1();
+                                    loginForm.Show();
+                                    this.Hide();
+                                }
+                            }
                         }
                     }
                     catch (Exception ex)
@@ -78,6 +105,7 @@ namespace EmployeeManagementSystem
                         connect.Close();
                     }
                 }
+            }
         }
     }
 }
