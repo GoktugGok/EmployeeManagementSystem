@@ -69,6 +69,10 @@ namespace EmployeeManagementSystem
                             {
                                 MessageBox.Show("Login successfully!"
                                     , "Information Message", MessageBoxButtons.OK,MessageBoxIcon.Information);
+
+                                MainForm mForm = new MainForm();
+                                mForm.Show();
+                                this.Hide();
                             }
                             else
                             {
